@@ -26,17 +26,26 @@ class _HomeScreenState extends State<HomeScreen> {
   String nomeUsuario = "";
 
   @override
+  void initState() {
+    carregarNomeUsuario();
+    super.initState();
+  }
+
+  Future<void> salvarRegistro(String valor) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString("nomeUsuario", valor);
+  }
+
+  void carregarNomeUsuario() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String nomeSalvo = prefs.getString("nomeUsuario") ?? "Desconhecido";
+    setState(() {
+      nomeUsuario = nomeSalvo;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    void salvarRegistro(String valor) async {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      prefs.setString("nomeUsuario", valor);
-    }
-
-    mostrarNome() async {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      return prefs.getString("nomeUsuario") ?? "";
-    }
-
     return Scaffold(
       appBar: AppBar(title: Text("Nome de usuário")),
       body: Column(
@@ -47,19 +56,10 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           ElevatedButton(
             onPressed: () async {
-              setState(() {
-                salvarRegistro(nomeController.text);
-              });
+              await salvarRegistro(nomeController.text);
+              carregarNomeUsuario();
             },
             child: Text(("Salvar")),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              setState(() async {
-                nomeUsuario = await mostrarNome();
-              });
-            },
-            child: Text(("Mostrar")),
           ),
           Text("Olá, seja bem vindo: $nomeUsuario"),
         ],
